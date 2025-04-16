@@ -7,6 +7,7 @@ use App\Contracts\Repositories\CartRepository;
 use App\Contracts\Repositories\ProductRepository;
 use App\Http\Requests\StoreCartRequest;
 use App\Services\CartService;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -57,13 +58,19 @@ class CartController extends Controller
         // You may want to implement this method based on your application's requirements
     }
 
-    public function delete($id)
-    {
-        try {
-            $this->cartInterface->delete($id);
-            return redirect()->route('cart')->with('success', 'Order berhasil dihapus.');
-        } catch (\Exception $e) {
-            return redirect()->route('cart')->with('error', 'Gagal menghapus order: ' . $e->getMessage());
-        }
+    public function destroy($id)
+{
+    $cart = Cart::find($id);
+
+    if (!$cart) {
+        return redirect()->back()->with('error', 'Item tidak ditemukan.');
     }
+
+    $cart->delete();
+
+    return redirect()->back()->with('success', 'Item berhasil dihapus dari cart.');
+}
+
+
+
 }

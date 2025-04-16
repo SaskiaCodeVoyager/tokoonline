@@ -13,6 +13,10 @@ class TransactionDetail extends Model
 
     use SoftDeletes, HasUuids;
 
+    protected $table = 'transaction_details';
+    protected $primaryKey = 'id';
+    public $timestamps = true;
+
     protected $fillable = [
         'transactions_id',
         'products_id',
@@ -29,11 +33,11 @@ class TransactionDetail extends Model
 
     public function product()
     {
-        return $this->hasOne(Product::class, 'id', 'products_id');
+        return $this->belongsTo(Product::class, 'products_id', 'id');
     }
 
     public function transaction()
     {
-        return $this->hasOne(Transaction::class, 'id', 'transactions_id');
+        return $this->belongsTo(Transaction::class, 'id', 'transactions_id');
     }
 }

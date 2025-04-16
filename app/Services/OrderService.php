@@ -27,6 +27,8 @@ class OrderService implements ShouldHandleFileUpload, CustomUploadValidation
         return $this->upload($disk, $file);
     }
 
+    
+
     public function store(StoreOrderRequest $request): array
     {
         $data = $request->validated();

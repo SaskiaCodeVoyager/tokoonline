@@ -10,10 +10,22 @@ use Illuminate\Http\Request;
 
 class CheckoutRepository implements CheckoutInterface
 {
-    public function getUserCart($userId)
+    public function getUserCart(Request $request)
     {
-        return Cart::with(['product', 'user'])->where('users_id', $userId)->get();
+        $selectedItems = is_array($request->selected_items) ? $request->selected_items : explode(',', $request->selected_items);
+
+        $cart = Cart::whereIn('id', $selectedItems)
+                    ->latest()
+                    ->get();
+         // Ambil transaksi terakhir
+
+        if (!$cart) {
+            return collect(); // Kembalikan collection kosong biar tidak error
+        }
+
+        return $cart ?? collect(); // Pastikan yang dikembalikan collection
     }
+
 
     public function createTransaction(Request $request)
     {
@@ -24,32 +36,32 @@ class CheckoutRepository implements CheckoutInterface
         ]);
     }
 
-    public function createTransactionDetails(Request $request, $transactionId)
+    public function createTransactionDetails($carts, $transactionId, $request)
     {
-        // Check if $request->carts is set and is an array
-        if (isset($request->carts) && is_array($request->carts)) {
-            foreach ($request->carts as $cart) {
-                TransactionDetail::create([
-                    'transactions_id' => $transactionId,
-                    'products_id' => $cart->product->id,
-                    'first_name' => $request->first_name,
-                    'last_name' => $request->last_name,
-                    'address' => $request->address,
-                    'city' => $request->city,
-                    'country' => $request->country,
-                    'zip_code' => $request->zip_code,
-                    'phone' => $request->phone,
-                    'qty' => $cart->qty,
-                ]);
+        foreach ($carts as $cart) {
+            if (!$cart->product) {
+                throw new \Exception("Produk tidak ditemukan di cart ID: {$cart->id}");
             }
-        } else {
-            // Handle the case where carts is not set or is not an array
-            // You can throw an exception, return an error response, or log the error
-            throw new \InvalidArgumentException('Carts data is required and must be an array.');
+
+            TransactionDetail::create([
+                'transactions_id' => $transactionId,
+                'products_id' => $cart->product->id,
+                'first_name' => $request->first_name ?? 'Guest',
+                'last_name' => $request->last_name ?? '-',
+                'address' => $cart->user->address ?? '-',
+                'city' => $cart->user->city ?? '-',
+                'country' => $cart->user->country ?? '-',
+                'zip_code' => $cart->user->zip_code ?? '-',
+                'phone' => $cart->user->phone ?? '-',
+                'qty' => $cart->qty ?? '1',
+            ]);
         }
     }
-    public function clearCart($userId)
+
+    public function getSelectedItems($userId)
     {
-        Cart::where('users_id', $userId)->delete();
+        return TransactionDetail::whereHas('transaction', function ($query) use ($userId) {
+            $query->where('users_id', $userId);
+        })->where('is_selected', true)->get();
     }
 }

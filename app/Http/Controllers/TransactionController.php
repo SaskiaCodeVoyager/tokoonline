@@ -20,12 +20,26 @@ class TransactionController extends Controller
 
     public function index()
     {
-        $query = $this->transactionService->getAllTransactions();
+        $transactions = $this->transactionService->getAllTransactions();
+       
+        $items = [];
+        $itemsDetails = [];
+        foreach ($transactions as $transaction) {
+            $firstItem = $this->transactionDetailService->getFirstTransactionDetailByTransactionId($transaction->id);
+            if ($firstItem) {
+                $items[$transaction->id] = $firstItem;
+            }
+            $itemsDetails[$transaction->id] = $this->transactionDetailService->getTransactionDetailsByTransactionId($transaction->id);
+        }
+
     
         return view('pages.admin.transaction.index', [
-            'query' => $query
+            'query' => $transactions,
+            'items' => $items,
+            'itemsDetails' => $itemsDetails
         ]);
     }
+    
 
     public function create()
     {
@@ -44,16 +58,17 @@ class TransactionController extends Controller
 
     public function edit(string $transactions_id)
     {
-        $transaction = $this->transactionService->findTransactionById($transactions_id); // Fetch the transaction
-        $items = $this->transactionDetailService->getFirstTransactionDetailByTransactionId($transactions_id);
+        $transaction = $this->transactionService->findTransactionById($transactions_id);
+        $firstItem = $this->transactionDetailService->getFirstTransactionDetailByTransactionId($transactions_id);
         $itemDetails = $this->transactionDetailService->getTransactionDetailsByTransactionId($transactions_id);
-        
+    
         return view('pages.admin.transaction.edit', [
-            'transaction' => $transaction, // Pass the transaction to the view
-            'items' => $items,
+            'transaction' => $transaction,
+            'items' => $firstItem ? [$firstItem] : [], // Pastikan ini berbentuk array
             'itemDetails' => $itemDetails
         ]);
     }
+    
 
     public function update(Request $request, string $id)
     {

@@ -17,9 +17,10 @@ class CheckoutController extends Controller
     public function index()
     {
         $checkouts = Cart::with(['product', 'user'])->where('users_id', Auth::user()->id)->get();
-
+        
+        dd($checkouts);
         return view('pages.checkout', [
-            'checkouts' => $checkouts
+            // 'checkouts' => $checkouts
         ]);
     }
 
@@ -36,6 +37,12 @@ class CheckoutController extends Controller
      */
     public function store(CheckoutRequest $request)
     {
+        $selectedItems = $request->input('qty', []); // Ambil qty untuk cek apakah ada produk
+    
+    // Cek apakah ada produk yang dipilih
+        if (empty($selectedItems) || !is_array($selectedItems)) {
+            return redirect()->back()->with('error', 'Silakan pilih produk sebelum checkout!');
+        }
         $carts = Cart::with(['product', 'user'])
             ->where('users_id', Auth::user()->id)
             ->get();

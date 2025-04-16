@@ -15,7 +15,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
-// l
+// 
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
@@ -31,12 +31,15 @@ Route::get('/success', [CheckoutController::class, 'success'])->name('success');
 // })->middleware(['auth', 'verified'])->name('home');
 
 Route::group(['middleware' => ['auth']], function () {
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-    Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
+    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+    // Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkoutpro');
+
     
     Route::post('/add-to-cart/{id}', [ShopDetailController::class, 'add'])->name('add-to-cart');
     Route::get('/cart', [CartController::class, 'index'])->name('cart');
-    Route::delete('/cart/{id}', [CartController::class, 'delete'])->name('cart-delete');
+    Route::post('/cart', [CartController::class, 'index']); 
+    Route::delete('/cart/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

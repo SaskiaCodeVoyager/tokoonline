@@ -9,92 +9,140 @@
     <div class="py-5 container-fluid page-header">
         <h1 class="text-center text-white display-6">Cart</h1>
         <ol class="mb-0 breadcrumb justify-content-center">
-            <li class="breadcrumb-item"><a href="{{ route('home')}}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ route('home') }}">Home</a></li>
             <li class="breadcrumb-item"><a href="#">Pages</a></li>
             <li class="text-white breadcrumb-item active">Cart</li>
         </ol>
     </div>
     <!-- Single Page Header End -->
 
+    @if (session('error'))
+    <div class="bg-red-500 text-white p-3 rounded mb-4">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    @if (session('success'))
+        <div class="bg-green-500 text-white p-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
 
     <!-- Cart Page Start -->
     <div class="py-5 container-fluid">
         <div class="container py-5">
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
+
+            @csrf
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col"><input type="checkbox" id="select-all"></th>
+                        <th scope="col">Products</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @php $subtotal = 0; @endphp
+                    @foreach ($carts as $cart)
                         <tr>
-                            <th scope="col">Products</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Price</th>
-                            <th scope="col">Quantity</th>
-                            <th scope="col">Total</th>
-                            <th scope="col">Action</th>
+                            <td>
+                                <input type="checkbox" class="cart-checkbox" name="selected_items[]"
+                                    value="{{ $cart->id }}">
+                            </td>
+                            <th scope="row">
+                                <img src="{{ Storage::url($cart->product->photos) }}" class="img-fluid rounded-circle"
+                                    style="width: 80px; height: 80px;" alt="">
+                            </th>
+                            <td>{{ $cart->product->name }}</td>
+                            <td>Rp.{{ number_format($cart->product->price) }}</td>
+                            <td>{{ $cart->qty }} Pcs</td>
+                            @php
+                                $total = $cart->product->price * $cart->qty;
+                                $subtotal += $total;
+                            @endphp
+                            <td>Rp.{{ number_format($total) }}</td>
+                            <td>
+                                <form action="{{ route('cart.destroy', $cart->id) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="border btn btn-md rounded-circle bg-light">
+                                        <i class="fa fa-times text-danger"></i>
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        @php $total = 0 @endphp
-                        @foreach ($carts as $cart)
-                            <tr>
-                                <th scope="row">
-                                    <div class="d-flex align-items-center">
-                                        <img src="{{ Storage::url($cart->product->photos) }}" class="img-fluid me-5 rounded-circle"
-                                            style="width: 80px; height: 80px;" alt="">
-                                    </div>
-                                </th>
-                                <td>
-                                    <p class="mt-4 mb-0">{{$cart->product->name}}</p>
-                                </td>
-                                <td>
-                                    <p class="mt-4 mb-0">Rp.{{number_format($cart->product->price)}}</p>
-                                </td>
-                                <td>
-                                    <p class="mt-4 mb-0">{{$cart->qty}} Pcs</p>
-                                </td>
-                                @php $total = $cart->product->price * $cart->qty @endphp
-                                <td>
-                                    <p class="mt-4 mb-0">{{number_format($total)}}</p>
-                                </td>
-                                <td>
-                                    <form action="{{ route('cart-delete', $cart->id) }}" method="POST">
-                                        @method('DELETE')
-                                        @csrf
-                                        <button class="mt-4 border btn btn-md rounded-circle bg-light">
-                                            <i class="fa fa-times text-danger"></i>
-                                        </button>
-                                    </form>
-                                </td>
+                    @endforeach
+                </tbody>
+            </table>
 
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            @if(count($carts) > 0)
-              
-      
-                <div class="row g-4 justify-content-end">
-                    <div class="col-8"></div>
-                    <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
-                        <div class="rounded bg-light">
-                            @php $subtotal = 0; @endphp
-                            @foreach ($carts as $cart)
-                                @php $subtotal += $cart->product->price * $cart->qty; @endphp
-                            @endforeach
-                            <div class="py-4 mb-4 border-bottom d-flex justify-content-between">
-                                <h5 class="mb-0 ps-4 me-4">Total</h5>
-                                <p class="mb-0 pe-4">Rp.{{ number_format($subtotal) }}</p>
-                            </div>
-                            <a href="{{ route('checkout') }}"
-                                class="px-4 py-3 mb-4 btn border-secondary rounded-pill text-primary text-uppercase ms-4"
-                                type="button">Proceed Checkout
-                            </a>
-                        </div>
+            @if (count($carts) > 0)
+                <form action="{{ route('checkout.index') }}" method="GET" id="checkout-form">
+                        <input type="hidden" name="selected_items" id="selected-items">
+                    <div class="d-flex justify-content-end">
+                        <h5>Total: <span id="total-amount">Rp.0</span></h5>
                     </div>
-                </div>
+                    <button type="submit"
+                        class="px-4 py-3 mb-4 btn border-secondary rounded-pill text-primary text-uppercase ms-4"
+                        id="checkout-button">Proceed Checkout
+                    </button>
+                </form>
             @endif
-
         </div>
     </div>
     <!-- Cart Page End -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let checkboxes = document.querySelectorAll(".cart-checkbox");
+            let totalAmount = document.getElementById("total-amount");
+            let selectAll = document.getElementById("select-all");
+            let selectedItemsInput = document.getElementById("selected-items");
+            let checkoutForm = document.getElementById("checkout-form");
+            let checkoutButton = document.getElementById("checkout-button");
+
+            function updateTotal() {
+                let total = 0;
+                let selectedItems = [];
+
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        let row = checkbox.closest("tr");
+                        let price = parseInt(row.children[5]?.innerText.replace(/\D/g, "")) || 0;
+                        total += price;
+                        selectedItems.push(checkbox.value);
+                    }
+                });
+
+                totalAmount.innerText = "Rp." + total.toLocaleString();
+                selectedItemsInput.value = selectedItems.join(",");
+                checkoutButton.disabled = selectedItems.length === 0; // Disable tombol jika tidak ada item terpilih
+            }
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener("change", updateTotal);
+            });
+
+            selectAll.addEventListener("change", function() {
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = selectAll.checked;
+                });
+                updateTotal();
+            });
+
+            checkoutForm.addEventListener("submit", function(event) {
+                if (selectedItemsInput.value.trim() === "") {
+                    event.preventDefault(); // Cegah form submit jika tidak ada item yang dipilih
+                    alert("Pilih setidaknya satu item sebelum checkout.");
+                }
+            });
+
+            updateTotal();
+        });
+    </script>
+
 @endsection

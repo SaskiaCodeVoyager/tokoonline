@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 interface CheckoutInterface
 {
     public function createTransaction(Request $request);
-    public function createTransactionDetails(Request $request, $transactionId);
-    public function clearCart($userId);
-    public function getUserCart($userId);
+    public function createTransactionDetails($carts, $transactionId, Request $request);
+
+    public function getUserCart(Request $request);
+    public function getSelectedItems($userId);
 }

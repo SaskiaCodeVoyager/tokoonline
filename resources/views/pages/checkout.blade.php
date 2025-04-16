@@ -16,6 +16,12 @@
 
     </div>
     <!-- Single Page Header End -->
+    
+    @if (session('error'))
+    <div class="alert alert-danger text-center">
+        {{ session('error') }}
+    </div>
+    @endif
 
 
     <!-- Checkout Page Start -->
@@ -79,23 +85,35 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @php $total = 0 @endphp
+                                    @php $totalPrice = 0; @endphp
                                     @foreach ($checkouts as $checkout)
-                                    @php $total = $checkout->product->price * $checkout->qty @endphp
+                                    @if ($checkout->product)
+                                        @php
+                                            $subtotal = $checkout->product->price * $checkout->qty;
+                                            $totalPrice += $subtotal;
+                                        @endphp
                                         <tr>
-                                            <th scope="row">
-                                                <div class="mt-2 d-flex align-items-center">
-                                                    <img src="{{Storage::url($checkout->product->photos) }}" class="img-fluid rounded-circle"
-                                                        style="width: 90px; height: 90px;" alt="">
-                                                </div>
-                                            </th>
-                                            <td class="py-5">{{$checkout->product->name}}</td>
-                                            <td class="py-5">Rp.{{number_format($checkout->product->price)}}</td>
-                                            <td class="py-5">{{$checkout->qty}}</td>
-                                            <input type="hidden" name="qty" value={{$checkout->qty}}>
-                                            <td class="py-5">{{number_format($total)}}</td>
+                                            <td>
+                                                <img src="{{ Storage::url($checkout->product->photos) }}" class="img-fluid rounded-circle"
+                                                    style="width: 90px; height: 90px;" alt="">
+                                            </td>
+                                            <td>{{ $checkout->product->name }}</td>
+                                            <td>Rp.{{ number_format($checkout->product->price) }}</td>
+                                            <td>{{ $checkout->qty }}</td>
+                                            <input type="hidden" name="qty[]" value="{{ $checkout->qty }}">
+                                            <td>Rp.{{ number_format($subtotal) }}</td>
                                         </tr>
-                                    @endforeach
+                                    @else
+                                        <tr>
+                                            <td colspan="5" class="text-danger">Produk tidak ditemukan</td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+
+                                    <tr>
+                                        <td colspan="4"><strong>Total Harga</strong></td>
+                                        <td><strong>Rp.{{ number_format($totalPrice) }}</strong></td>
+                                    </tr>
                                    
                                     <tr>
                                         @php $totalPrice = 0 @endphp

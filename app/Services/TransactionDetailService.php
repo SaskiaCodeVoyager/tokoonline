@@ -16,6 +16,7 @@ class TransactionDetailService
     {
         return TransactionDetail::with(['transaction', 'product'])
             ->where('transactions_id', $transactionId)
-            ->firstOrFail();
+            ->first();
     }
+    
 }

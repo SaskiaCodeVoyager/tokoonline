@@ -13,6 +13,9 @@ class Transaction extends Model
 
     use SoftDeletes, HasUuids;
 
+    protected $table = 'transactions';
+    protected $primaryKey = 'id';
+    public $timestamps = true;
 
     protected $fillable = [
         'users_id', 
@@ -31,4 +34,15 @@ class Transaction extends Model
     {
         return $this->hasMany(TransactionDetail::class, 'id', 'transaction_detail_id');
     }
+
+    public function products()
+    {
+        return $this->hasManyThrough(Product::class, TransactionDetail::class, 'transactions_id', 'id', 'id', 'products_id');
+    }
+
+    public function details()
+    {
+        return $this->hasMany(TransactionDetail::class, 'transactions_id', 'id');
+    }
+
 }
