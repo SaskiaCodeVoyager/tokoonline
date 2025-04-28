@@ -41,30 +41,5 @@ class ProductRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'Nama produk wajib diisi.',
-            'name.min' => 'Nama produk minimal harus memiliki 3 karakter.',
-            'name.max' => 'Nama produk maksimal 255 karakter.',
-            'photos.image' => 'File harus berupa gambar.',
-            'photos.mimes' => 'Format gambar yang diperbolehkan: jpeg, png, jpg, gif.',
-            'photos.max' => 'Ukuran gambar maksimal 2MB.',
-            'quantity.required' => 'Jumlah produk wajib diisi.',
-            'quantity.integer' => 'Jumlah produk harus berupa angka.',
-            'quantity.min' => 'Jumlah produk minimal 1.',
-            'quality.required' => 'Kualitas produk wajib diisi.',
-            'thumb_description.required' => 'Deskripsi singkat wajib diisi.',
-            'short_description.required' => 'Deskripsi pendek wajib diisi.',
-            'long_description.required' => 'Deskripsi panjang wajib diisi.',
-            'price.required' => 'Harga produk wajib diisi.',
-            'price.integer' => 'Harga harus berupa angka.',
-            'price.min' => 'Harga minimal harus 1.',
-            'weight.required' => 'Berat produk wajib diisi.',
-            'weight.numeric' => 'Berat produk harus berupa angka.',
-            'weight.min' => 'Berat minimal 0.1.',
-            'check.required' => 'Cek status wajib diisi.',
-            'country_of_origin.required' => 'Negara asal produk wajib diisi.',
-        ];
-    }
+    
 }

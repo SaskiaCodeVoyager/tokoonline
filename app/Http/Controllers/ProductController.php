@@ -43,7 +43,7 @@ class ProductController extends Controller
 
         $this->productInterface->create($data);
 // Menambahkan pesan flash untuk memberi tahu pengguna
-    session()->flash('success', 'Produk berhasil disimpan.');
+    session()->flash('success', 'product created successfully.');
 
     return redirect()->route('product');
     }
@@ -65,12 +65,12 @@ class ProductController extends Controller
 
         $this->productInterface->update($id, $data);
 
-        return redirect()->route('product');
+        return redirect()->route('product')->with('success', 'product updated successfully.');
     }
 
     public function destroy(string $id)
     {
         $this->productInterface->delete($id);
-        return redirect()->route('product');
+        return redirect()->route('product')->with('success', 'product deleted successfully.');
     }
 }

@@ -15,13 +15,13 @@ class Category extends Model
     use SoftDeletes, HasUuids;
 
     protected $fillable = [
-        'name', 'slug'
+        'name', 'slug', 'photo'
     ];
 
     protected $hidden = [];
 
     public function products()
     {
-        return $this->hasMany(Product::class); // Assuming your related model is Product
+        return $this->hasMany(Product::class, 'categories_id'); // Assuming your related model is Product
     }
 }

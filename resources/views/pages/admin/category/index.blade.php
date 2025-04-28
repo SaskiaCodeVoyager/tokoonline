@@ -134,6 +134,16 @@ a.btn {
 </div>
 @endif
 
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: "{{ session('error') }}",
+    });
+</script>
+@endif
+
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -150,6 +160,7 @@ a.btn {
                                         <thead class="bg-blue-100">
                                             <tr>
                                                 <th>No</th>
+                                                <th>Icon</th>
                                                 <th>Name</th>
                                                 <th>Slug</th>
                                                 <th>Action</th>
@@ -159,6 +170,13 @@ a.btn {
                                             @foreach ($query as $key => $category)
                                                 <tr class="hover:bg-blue-50">
                                                     <td>{{ $key + 1 }}</td>
+                                                    <td>
+                                                        @if($category->photo)
+                                                            <img src="{{ asset('storage/' . $category->photo) }}" class="h-16 w-16 object-cover rounded-lg" alt="Category Image">
+                                                        @else
+                                                            <span class="text-gray-500">No Image</span>
+                                                        @endif
+                                                    </td>
                                                     <td>{{ $category->name }}</td>
                                                     <td>{{ $category->slug }}</td>
                                                     <td>
@@ -166,14 +184,21 @@ a.btn {
                                                             <a href="{{ route('category.edit', $category->id) }}" class="mb-1 mr-1 btn btn-soft-blue">
                                                                 Edit
                                                             </a>
-                                                            <form id="deleteForm{{ $category->id }}" action="{{ route('category.destroy', $category->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus kategori ini?')">
-                                                                @method('delete')
-                                                                @csrf
-                                                                <button type="submit" class="mb-1 mr-1 btn btn-soft-red">
-                                                                    Delete
+                                                            @if(!$category->products()->exists()) 
+                                                                <form id="deleteForm{{ $category->id }}" action="{{ route('category.destroy', $category->id) }}" method="POST" ">
+                                                                    @method('delete')
+                                                                    @csrf
+                                                                    <button type="button" class="mb-1 mr-1 btn btn-soft-red delete-btn" data-id="{{ $category->id }}">
+                                                                        Delete
+                                                                    </button>                                                                    
+                                                                </form>
+                                                            @else
+                                                                <button class="mb-1 mr-1 btn btn-secondary cursor-not-allowed" disabled>
+                                                                    In Use
                                                                 </button>
-                                                            </form>
+                                                            @endif
                                                         </div>
+
                                                     </td>
                                                 </tr>
                                             @endforeach
@@ -188,6 +213,67 @@ a.btn {
             </div>
         </div>
 </x-app-layout>
+
+<!-- Modal Konfirmasi -->
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-96">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-200">Apakah Anda yakin?</h2>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Data kategori ini akan dihapus secara permanen.</p>
+        <div class="mt-4 flex justify-end space-x-2">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Batal</button>
+            <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let deleteId = null;
+
+        function openModal(event, id) {
+            event.preventDefault(); // Mencegah form langsung terkirim
+            deleteId = id;
+            document.getElementById("confirmModal").classList.remove("hidden");
+            document.getElementById("confirmModal").classList.add("flex");
+        }
+
+        function closeModal() {
+            document.getElementById("confirmModal").classList.add("hidden");
+            document.getElementById("confirmModal").classList.remove("flex");
+            deleteId = null;
+        }
+
+        // Event listener untuk semua tombol delete
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", function (event) {
+                const categoryId = this.getAttribute("data-id");
+                openModal(event, categoryId);
+            });
+        });
+
+        // Tombol konfirmasi hapus
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+            if (deleteId) {
+                document.getElementById("deleteForm" + deleteId).submit();
+            }
+        });
+
+        // Tutup modal dengan klik di luar modal
+        window.addEventListener("click", function (event) {
+            const modal = document.getElementById("confirmModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Tutup modal dengan tombol ESC
+        window.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    });
+</script>
 
 @push('addon-script')
     <script>
@@ -221,4 +307,5 @@ a.btn {
             ]
         });
     </script>
-@endpush
+    @endpush
+

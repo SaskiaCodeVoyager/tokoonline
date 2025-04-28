@@ -88,6 +88,7 @@
                             <div class="card-body">
                                 <form method="post" action="{{ route('category.update', $item->id) }}" class="mt-6 space-y-6" enctype="multipart/form-data">
                                     @csrf
+                                    @method('PUT')
                                     
                                     <div>
                                         <x-input-label for="name" :value="__('Category Name')" />
@@ -98,6 +99,23 @@
                                         @enderror
                                     </div>
                                     
+                                    <div>
+                                        <x-input-label for="photo" :value="__('Category Photo')" />
+                                        <input id="photo" name="photo" type="file" class="block w-full border rounded-md p-2" accept="image/*">
+                                        
+                                        <!-- Preview Foto Saat Ini -->
+                                        @if($item->photo)
+                                            <div class="mt-4">
+                                                <p class="text-gray-600">Current Photo:</p>
+                                                <img src="{{ asset('storage/' . $item->photo) }}" class="h-32 w-32 object-cover rounded-lg" alt="Category Image">
+                                            </div>
+                                        @endif
+
+                                        @error('photo')
+                                            <p class="text-red-500">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
                                     <div class="form-actions">
                                         <a class="btn btn-cancel" href="{{ route('category') }}">
                                             {{ __('Cancel') }}

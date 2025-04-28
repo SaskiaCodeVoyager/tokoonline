@@ -31,14 +31,5 @@ class CategoryRequest extends FormRequest
      *
      * @return array<string, string>
      */
-    public function messages(): array
-    {
-        return [
-            'name.required' => 'Nama kategori harus diisi.',
-            'name.string' => 'Nama kategori harus berupa teks.',
-            'name.min' => 'Nama kategori harus terdiri dari minimal 3 karakter.',
-            'name.max' => 'Nama kategori tidak boleh lebih dari 255 karakter.',
-            'name.unique' => 'Nama kategori sudah terdaftar. Silakan pilih nama kategori lain.',
-        ];
-    }
+
 }

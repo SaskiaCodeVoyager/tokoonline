@@ -267,6 +267,82 @@
         background-color: #2c80cc; /* Biru lebih gelap saat hover */
     }
 
+    /* Styling untuk Cart agar tidak terlalu panjang */
+.cart {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    max-height: 400px; /* Batasi tinggi Cart */
+    overflow-y: auto; /* Tambahkan scroll jika item terlalu banyak */
+}
+
+/* Styling untuk item di dalam Cart */
+.cart-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.cart-item img {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+}
+
+.cart-item-name {
+    font-size: 14px;
+    font-weight: bold;
+    color: #1e3c73;
+}
+
+.cart-item-price {
+    font-size: 13px;
+    color: #5c6bc0;
+}
+
+.cart-item-remove {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.cart-item-remove:hover {
+    background: #c0392b;
+}
+
+.cart-total {
+    font-size: 16px;
+    font-weight: bold;
+    color: #1e3c73;
+    text-align: right;
+    margin-top: 10px;
+}
+
+.checkout-btn {
+    background: #5c6bc0;
+    color: white;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.checkout-btn:hover {
+    background: #3949ab;
+}
+
+
     /* Membuat bentuk hati di sekitar slider */
     
 </style>
@@ -392,34 +468,54 @@
                             <div class="row g-4 justify-content-center">
                                 @foreach ($products as $item)
                                     <div class="col-md-6 col-lg-6 col-xl-4">
-                                        <a href="{{ route('shop-detail', $item->id) }}"
-                                            class="rounded position-relative fruite-item">
+                                        <a href="{{ route('shop-detail', $item->id) }}" class="rounded position-relative fruite-item">
                                             <div class="fruite-img">
-                                                <img src="{{ Storage::url($item->photos) }}"
-                                                    class="img-fluid w-100 rounded-top" alt="">
+                                                <img src="{{ Storage::url($item->photos) }}" class="img-fluid w-100 rounded-top" alt="">
                                             </div>
                                             <div class="px-3 py-1 text-white rounded bg-secondary position-absolute"
                                                 style="top: 10px; left: 10px;">{{ $item->category->name }}</div>
                                             <div class="p-4 border border-secondary border-top-0 rounded-bottom">
-                                                <h4>{{ $item->name }}</h4>
-                                                <small class="mb-1 text-dark fw-bold">Rp.{{ number_format($item->price) }}
-                                                    / kg</small>
-                                                <p style="color: #747d88 !important">{!! $item->thumb_description !!}</p>
-                                                <div class="d-flex justify-content-center flex-lg-wrap">
-                                                    <button type="submit"
-                                                        class="x-4 py-2 mb-4 border btn border-secondary rounded-pill text-primary">
+                                                <h4 class="text-primary fw-bold">{{ $item->name }}</h4>
+                                                <small class="mb-2 text-dark fw-bold d-block">Rp.{{ number_format($item->price) }} / kg</small>
+                                                <p class="text-muted">{!! $item->thumb_description !!}</p>
+                            
+                                                <!-- Tabel Informasi Produk -->
+                                                {{-- <table class="table table-bordered text-center small">
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class="fw-bold bg-light">Min Weight</td>
+                                                            <td>{{ $item->weight }} kg</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-bold bg-light">Country of Origin</td>
+                                                            <td>{{ $item->country_of_origin }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-bold bg-light">Quality</td>
+                                                            <td>{{ $item->quality }}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-bold bg-light">Check</td>
+                                                            <td>{{ $item->check }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table> --}}
+                            
+                                                {{-- <div class="d-flex justify-content-center flex-lg-wrap">
+                                                    <a href="{{ route('shop-detail', $item->id) }}" class="x-4 py-2 mb-3 btn btn-primary rounded-pill">
                                                         Detail
-                                                    </button>
-                                                </div>
+                                                    </a>
+                                                </div> --}}
                                             </div>
                                         </a>
                                     </div>
                                 @endforeach
-
+                            
                                 <div class="text-center">
                                     {{$products->links()}}
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                 </div>

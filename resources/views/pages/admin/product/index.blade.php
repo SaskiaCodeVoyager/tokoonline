@@ -81,6 +81,21 @@
         }
     </style>
 
+@if(session('success'))
+<div class="mb-4 rounded-lg bg-green-100 p-4 text-green-800 shadow">
+    {{ session('success') }}
+</div>
+@endif
+
+@if($errors->any())
+<div class="mb-4 rounded-lg bg-red-100 p-4 text-red-800 shadow">
+    @foreach($errors->all() as $error)
+        <p>{{ $error }}</p>
+    @endforeach
+</div>
+@endif
+
+
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-lg dark:bg-gray-800 sm:rounded-lg">
@@ -118,7 +133,9 @@
                                                     <td>{{ $product->quality }}</td>
                                                     <td>{{ $product->country_of_origin }}</td>
                                                     <td>{{ $product->weight }}</td>
-                                                    <td><img src="{{ Storage::url($product->photos) }}" alt="Product Image"></td>
+                                                    <td>
+                                                        <img src="{{ Storage::url($product->photos) }}" alt="Product Image" class="w-16 h-16 object-cover rounded">
+                                                    </td>
                                                     <td>
                                                         <div class="btn-group">
                                                             <a href="{{ route('product.edit', $product->id) }}" class="mb-1 mr-1 btn btn-primary">
@@ -127,9 +144,10 @@
                                                             <form id="deleteForm{{ $product->id }}" action="{{ route('product.destroy', $product->id) }}" method="POST">
                                                                 @method('delete')
                                                                 @csrf
-                                                                <button type="submit" class="mb-1 mr-1 btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus produk ini?')">
+                                                                <button type="button" class="mb-1 mr-1 btn btn-danger delete-btn" data-id="{{ $product->id }}">
                                                                     Delete
                                                                 </button>
+                                                                                                                             
                                                             </form>
                                                         </div>
                                                     </td>
@@ -146,4 +164,63 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Konfirmasi -->
+<div id="confirmModal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" style="display: none;">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-96">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-200">Apakah Anda yakin?</h2>
+        <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">Data ini akan dihapus secara permanen.</p>
+        <div class="mt-4 flex justify-end space-x-2">
+            <button onclick="closeModal()" class="px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Batal</button>
+            <button id="confirmDeleteBtn" class="px-4 py-2 bg-red-600 text-white rounded-lg">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let deleteId = null;
+
+        function openModal(event, id) {
+            event.preventDefault(); // Mencegah form langsung terkirim
+            deleteId = id;
+            document.getElementById("confirmModal").style.display = "flex";
+        }
+
+        function closeModal() {
+            document.getElementById("confirmModal").style.display = "none";
+            deleteId = null;
+        }
+
+        document.querySelectorAll(".delete-btn").forEach(button => {
+            button.addEventListener("click", function (event) {
+                const productId = this.getAttribute("data-id");
+                openModal(event, productId);
+            });
+        });
+
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function () {
+            if (deleteId) {
+                document.getElementById("deleteForm" + deleteId).submit();
+            }
+        });
+
+        // Tutup modal dengan klik di luar modal
+        window.addEventListener("click", function (event) {
+            const modal = document.getElementById("confirmModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Tutup modal dengan tombol ESC
+        window.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    });
+</script>
+
+
 </x-app-layout>

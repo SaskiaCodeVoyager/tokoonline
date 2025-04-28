@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Category;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 
 class CategoryController extends Controller
@@ -40,9 +41,14 @@ class CategoryController extends Controller
 
         $data['slug'] = Str::slug($request->name);
 
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('category_photos', 'public');
+            $data['photo'] = $photoPath;
+        }
+
         Category::create($data);
 
-        return redirect()->route('category');
+        return redirect()->route('category')->with('success', 'category created successfully.');
     }
 
     /**
@@ -76,9 +82,22 @@ class CategoryController extends Controller
 
         $item = Category::findOrFail($id);
 
+        // Jika ada file foto baru, hapus yang lama dan simpan yang baru
+        if ($request->hasFile('photo')) {
+            // Hapus foto lama
+            if ($item->photo) {
+                Storage::disk('public')->delete($item->photo);
+            }
+
+            // Simpan foto baru
+            $photoPath = $request->file('photo')->store('category_photos', 'public');
+            $data['photo'] = $photoPath;
+        }
+
+
         $item->update($data);
 
-        return redirect()->route('category');
+        return redirect()->route('category')->with('success', 'category updated successfully.');
     }
 
     /**
@@ -89,17 +108,25 @@ class CategoryController extends Controller
     // Temukan kategori berdasarkan ID
     $category = Category::findOrFail($id);
 
-    // // Cek apakah kategori digunakan dalam produk lain menggunakan query langsung
-    // if ($category->products()->exists()) {
-    //     return redirect()->back()->withErrors(['msg' => 'Kategori ini tidak bisa dihapus karena sedang digunakan dalam produk.']);
-    // }
+    // Cek apakah kategori memiliki produk terkait
+    if ($category->products()->exists()) {
+        return redirect()->back()->withErrors([
+            'msg' => 'Category cannot be deleted because it has associated products.'
+        ]);
+    }
 
-    // Hapus kategori jika tidak digunakan
-    $category->delete();
+    // Hapus foto terkait sebelum menghapus kategori
+    if ($category->photo) {
+        Storage::disk('public')->delete($category->photo);
+    }
 
-    // Redirect kembali ke halaman kategori dengan pesan sukses
-    return redirect()->route('category')->with('success', 'Kategori berhasil dihapus.');
+    // Hapus kategori beserta produk jika user memilih menghapus semuanya
+    $category->products()->forceDelete(); // atau forceDelete jika ingin permanen
+    $category->forceDelete();
+
+    return redirect()->route('category')->with('success', 'category and products deleted successfully.');
 }
+
 
 
 }
